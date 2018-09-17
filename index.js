@@ -31,4 +31,10 @@ wsServer.on('connection', (ws, req) => {
 // HTTP stuff
 app.get('/client', (req, res) => res.sendFile(path.resolve(__dirname, './client.html')));
 app.get('/streamer', (req, res) => res.sendFile(path.resolve(__dirname, './streamer.html')));
+app.get('/', (req, res) => {
+    res.send(`
+        <a href="streamer">Streamer</a><br>
+        <a href="client">Client</a>
+    `);
+});
 app.listen(HTTP_PORT, () => console.log(`HTTP server listening at http://localhost:${HTTP_PORT}`));
