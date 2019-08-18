@@ -11,17 +11,16 @@
         video.src = URL.createObjectURL(mediaSource)
 
         mediaSource.addEventListener('sourceopen', e => {
-            const sourceBuffer = mediaSource.addSourceBuffer('video/webm; codecs="vp8"')
+            const sourceBuffer = mediaSource.addSourceBuffer('video/webm;codecs=vp8,opus')
             ws.onmessage = message => {
                 console.log(message)
                 new Response(message.data)
                     .arrayBuffer()
                     .then(buffer => {
-                        sourceBuffer.addEventListener('updateend', function (_) {
-                        mediaSource.endOfStream();
-                        video.play();
-                        //console.log(mediaSource.readyState); // ended
-                        });
+                        sourceBuffer.addEventListener('updateend', () => {
+                            mediaSource.endOfStream()
+                            video.play()
+                        })
                         sourceBuffer.appendBuffer(buffer)
                     })
             }
