@@ -3,18 +3,30 @@
     <title>Client</title>
 </head>
 <body>
-    <img src="">
+    <video autoplay></video>
     <script>
-        // get img dom element
-        const img = document.querySelector('img');
-        
-        const WS_URL = location.origin.replace(/^http/, 'ws');
-        const ws = new WebSocket(WS_URL);
-        ws.onopen = () => console.log(`Connected to ${WS_URL}`);
-        ws.onmessage = message => {
-            // set the base64 string to the src tag of the image
-            img.src = message.data;
-        }
+        const video = document.querySelector('video')
+
+        const mediaSource = new MediaSource()
+        video.src = URL.createObjectURL(mediaSource)
+
+        mediaSource.addEventListener('sourceopen', e => {
+            const sourceBuffer = mediaSource.addSourceBuffer('video/webm; codecs="vp8"')
+            ws.onmessage = message => {
+                console.log(message)
+                new Response(message.data)
+                    .arrayBuffer()
+                    .then(buffer => {
+                        sourceBuffer.addEventListener('updateend', function (_) {
+                        mediaSource.endOfStream();
+                        video.play();
+                        //console.log(mediaSource.readyState); // ended
+                        });
+                        sourceBuffer.appendBuffer(buffer)
+                    })
+            }
+        })
+        const ws = new WebSocket('ws://localhost:3000')
     </script>
 </body>
 </html>

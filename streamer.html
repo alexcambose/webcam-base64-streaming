@@ -4,31 +4,31 @@
 </head>
 <body>
     <video autoplay></video>
+
     <script>
-        // get video dom element
-        const video = document.querySelector('video');
-        
-        // request access to webcam
-        navigator.mediaDevices.getUserMedia({video: {width: 426, height: 240}}).then((stream) => video.srcObject = stream);
-        
-        // returns a frame encoded in base64
-        const getFrame = () => {
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0);
-            const data = canvas.toDataURL('image/png');
-            return data;
+        const video = document.querySelector('video')
+
+        navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: false
+        }).then(stream => {
+        video.srcObject = stream
+        stream.onactive = e => console.log(e)
+
+        const ws = new WebSocket('ws://localhost:3000')
+
+        const recorder = new MediaRecorder(stream)
+        recorder.ondataavailable = event => {
+            console.log(event.data)
+            ws.send(event.data)
         }
-        const WS_URL = location.origin.replace(/^http/, 'ws');
-        const FPS = 3;
-        const ws = new WebSocket(WS_URL);
-        ws.onopen = () => {
-            console.log(`Connected to ${WS_URL}`);
-            setInterval(() => {
-                ws.send(getFrame());
-            }, 1000 / FPS);
-        }
+
+        recorder.start()
+        setInterval(() => {
+            recorder.stop()
+            recorder.start()
+        }, 200)
+        })
     </script>
 </body>
 </html>
