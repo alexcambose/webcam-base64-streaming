@@ -1,31 +1,51 @@
 <html>
+
 <head>
     <title>Client</title>
 </head>
+
 <body>
     <video autoplay></video>
     <script>
+        var websocket = new WebSocket('ws://localhost:3000');
+        websocket.binaryType = 'arraybuffer';
+
+        var mediaSource = new MediaSource();
+        var buffer;
+        var queue = [];
+
         const video = document.querySelector('video')
+        video.src = window.URL.createObjectURL(mediaSource);
 
-        const mediaSource = new MediaSource()
-        video.src = URL.createObjectURL(mediaSource)
+        mediaSource.addEventListener('sourceopen', function (e) {
+            video.play();
 
-        mediaSource.addEventListener('sourceopen', e => {
-            const sourceBuffer = mediaSource.addSourceBuffer('video/webm;codecs=vp8,opus')
-            ws.onmessage = message => {
-                console.log(message)
-                new Response(message.data)
-                    .arrayBuffer()
-                    .then(buffer => {
-                        sourceBuffer.addEventListener('updateend', () => {
-                            mediaSource.endOfStream()
-                            video.play()
-                        })
-                        sourceBuffer.appendBuffer(buffer)
-                    })
+            buffer = mediaSource.addSourceBuffer('video/webm;codecs=vp8,opus');
+
+            buffer.addEventListener('update', function () { // Note: Have tried 'updateend'
+                if (queue.length > 0 && !buffer.updating) {
+                    buffer.appendBuffer(queue.shift()); 
+                    video.play();
+                }
+            });
+        }, false);
+
+        mediaSource.addEventListener('sourceopen', function (e) { console.log('sourceopen: ' + mediaSource.readyState); });
+        mediaSource.addEventListener('sourceended', function (e) { console.log('sourceended: ' + mediaSource.readyState); });
+        mediaSource.addEventListener('sourceclose', function (e) { console.log('sourceclose: ' + mediaSource.readyState); });
+        mediaSource.addEventListener('error', function (e) { console.log('error: ' + mediaSource.readyState); });
+
+        websocket.addEventListener('message', function (e) {
+            console.log('message')
+            if (typeof e.data !== 'string') {
+                if (buffer.updating || queue.length > 0) {
+                    queue.push(e.data);
+                } else {
+                    buffer.appendBuffer(e.data);
+                }
             }
-        })
-        const ws = new WebSocket('ws://localhost:3000')
+        }, false);
     </script>
 </body>
+
 </html>

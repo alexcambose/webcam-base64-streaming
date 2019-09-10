@@ -17,7 +17,7 @@
 
         const ws = new WebSocket('ws://localhost:3000')
 
-        const recorder = new MediaRecorder(stream)
+        const recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp8,opus' })
         recorder.ondataavailable = event => {
             console.log(event.data)
             ws.send(event.data)
