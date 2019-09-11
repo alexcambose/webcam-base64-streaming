@@ -22,11 +22,13 @@
 
             buffer = mediaSource.addSourceBuffer('video/webm;codecs=vp8,opus');
 
-            buffer.addEventListener('update', function () { // Note: Have tried 'updateend'
+            buffer.addEventListener('updateend', function () { // Note: Have tried 'updateend'
                 if (queue.length > 0 && !buffer.updating) {
-                    buffer.appendBuffer(queue.shift()); 
+                    buffer.appendBuffer(queue.shift());
+                    mediaSource.endOfStream();
                     video.play();
                 }
+                mediaSource.endOfStream();
             });
         }, false);
 
