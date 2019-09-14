@@ -25,7 +25,6 @@
             buffer.addEventListener('updateend', function () { // Note: Have tried 'updateend'
                 if (queue.length > 0 && !buffer.updating) {
                     buffer.appendBuffer(queue.shift());
-                    mediaSource.endOfStream();
                     video.play();
                 }
                 mediaSource.endOfStream();
