@@ -20,6 +20,6 @@
   "homepage": "https://github.com/alexcambose/webcam-base64-streaming#readme",
   "dependencies": {
     "express": "^4.16.3",
-    "ws": "^6.0.0"
+    "ws": "^7.4.6"
   }
 }
